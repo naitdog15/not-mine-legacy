@@ -39,10 +39,17 @@ and never stage the LSO jar here (not redistributable; building-bridges-only opt
   rebuild (`ordering="NONE"` on its NAS/MB/RS deps); the re-boot with all-built module jars passed
   sorting and constructed all 9 modules (module jars now all sourced from `_tools/built-jars`,
   hash-verified against its SHA256SUMS.txt).
-- Blocker 2 (OPEN, escalated to remnant-stars): headless `runServer` crashes in remnantstars
-  `FMLCommonSetupEvent` — `RemnantStarsNetwork.register` (RemnantStarsNetwork.java:122, the
-  `PromptSpellbookNaming` PLAY_TO_CLIENT message) loads client-only `net.minecraft.client.gui.screens.Screen`
-  on DEDICATED_SERVER (BootstrapMethodError via RuntimeDistCleaner). Pre-existing: the file is
-  byte-identical to the monorepo's; it never surfaced because the ecosystem was only ever booted
-  via `runClient`. A production dedicated server would crash the same way. Re-run the smoke boot
-  after remnant-stars delivers a side-safe jar.
+- Blocker 2 (RESOLVED): remnantstars `FMLCommonSetupEvent` crashed loading client-only
+  `net.minecraft.client.gui.screens.Screen` on DEDICATED_SERVER from `RemnantStarsNetwork.register`
+  (RemnantStarsNetwork.java:122, the `PromptSpellbookNaming` PLAY_TO_CLIENT message). Pre-existing
+  (file byte-identical to the monorepo's — the ecosystem was only ever booted via `runClient`).
+  Fixed by the remnant-stars rebuild delegating via a client-only `ClientNamingPromptHandler`
+  (jar sha256 `6bbcd4f2...`).
+- **Boot #4 PASS: headless `runServer` reached `Done (26.781s)!`** — 29 unique mod files, all 9
+  NML modules active, gametest namespace `notminelegacy` enabled. Non-fatal data oddities recorded
+  (all verified pre-existing in the monorepo sources): remnantstars ritual `am_summon_snow_leopard`
+  uses unknown item `minecraft:raw_mutton` (1.20.1 id is `minecraft:mutton`); tidalaccord's
+  `seadwellers:tidalaccord/ominous_tides` advancement references `minecraft:ominous_banner` (not an
+  item id in 1.20.1); RS StarwellRitualValidator reports keystone `remnantstars:blank_spellbook`
+  shared by 2 rituals; twilightforest `cicada_jar` advancement references absent optional
+  `supplementaries:jar` (third-party, benign).
