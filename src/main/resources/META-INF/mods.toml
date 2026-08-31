@@ -1,0 +1,149 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="notminelegacy"
+version="${mod_version}"
+displayName="Not Mine Legacy"
+authors="${mod_authors}"
+description='''Not Mine Legacy — Shared compatibility and service layer for the NML module jars.'''
+
+[[dependencies.notminelegacy]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Optional. Core exposes ModCompat.isCuriosLoaded() so modules can gate Curios integrations;
+# nothing in core requires Curios to be present.
+[[dependencies.notminelegacy]]
+modId="curios"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+# Optional worldgen compat. NotMineLegacy.prewarmExternalWorldgenTypes() (NotMineLegacy.java:63)
+# force-inits TerraBlender's/AeroBlender's region-type classes early to dodge a worldgen
+# registration race; the whole prewarm is skipped in Java when either is absent. Common-side
+# worldgen code → BOTH.
+[[dependencies.notminelegacy]]
+modId="aeroblender"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="terrablender"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+# Optional. NotMineLegacy's constructor force-inits VanillaBackport's <clinit> early
+# (NotMineLegacy.java:39) to dodge a ForkJoin-worker-thread class-init race during texture
+# atlas loading; the client-side wolf-armor fallback mixin/compat also gate on it
+# (mixin/client/EntityModelSetWolfArmorFallbackMixin.java:40, client/compat/WolfArmorLayerCompat.java:39).
+# Used from both common and client code → BOTH.
+[[dependencies.notminelegacy]]
+modId="vanillabackport"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+# Optional. Client-only cascade notice overlay reads Particular's cascade map directly
+# (client/compat/ParticularCascadeNoticeHandler.java:44,93,115); no server-side use.
+[[dependencies.notminelegacy]]
+modId="particular"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="CLIENT"
+
+# Optional. Gates a client-only renderer-fallback mixin so it only applies when GeckoLib is
+# actually present (mixin/NotMineLegacyMixinPlugin.java:13-35, targeting
+# mixin/client/GeckoLibCreeperRendererFallbackMixin.java).
+[[dependencies.notminelegacy]]
+modId="geckolib"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="CLIENT"
+
+# Optional. compat/DonkeyChestBridge.isActive() (compat/DonkeyChestBridge.java:30) checks Quark
+# directly — the bridge is only worth having when Quark is loaded (it owns the "Quark:DonkChest"
+# NBT format the bridge mirrors). Declaring it here makes that check visible in metadata.
+# NOTE: the same method also checks buildingbridges/overdueoverhauls, but those are sibling
+# package modules — per the inter-module dependency rule, core must NEVER depend on a package
+# module (not even optionally), so they are deliberately NOT declared here.
+[[dependencies.notminelegacy]]
+modId="quark"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+# The remaining presence gates core publishes through compat/ModCompat.java for other modules to
+# consume (isAetherLoaded, isCitadelLoaded, isSeaDwellersLoaded, isDeeperOceansLoaded,
+# isRegionsUnexploredLoaded, isTinkersConstructLoaded — ModCompat.java:17-25). Core itself needs
+# none of them; it just owns the cached lookup so modules don't each re-roll one. Declared for the
+# same reason curios is above: the rule is that a gate visible in Java should be visible in
+# metadata too, and it gets Forge to order these before us when they are present.
+# NOTE: ModCompat also gates tidalaccord and nml_concord (ModCompat.java:21,26). Those are sibling
+# package modules and are deliberately NOT declared — core must never depend on a package module,
+# even optionally. Same reasoning as the buildingbridges/overdueoverhauls note above.
+[[dependencies.notminelegacy]]
+modId="aether"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="citadel"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="seadwellers"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="deeper_oceans"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="regions_unexplored"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.notminelegacy]]
+modId="tconstruct"
+mandatory=false
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[mixins]]
+config="notminelegacy.mixins.json"

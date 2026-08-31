@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.temog.notminelegacy.mixin",
+  "plugin": "com.temog.notminelegacy.mixin.NotMineLegacyMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "priority": 500,
+  "mixins": [
+    "common.SpeechBubbleMobMixin",
+    "common.TemptGoalThreadSafetyMixin",
+    "common.PlatformSafeConfigDevFix"
+  ],
+  "client": [
+    "client.GeckoLibCreeperRendererFallbackMixin",
+    "client.EntityModelSetWolfArmorFallbackMixin",
+    "client.MusicFadeManagerDevFix",
+    "client.ParticularCascadeHudSuppressMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
