@@ -33,8 +33,16 @@ plus two transitive libraries the 2026-08-31 smoke boot proved mandatory: `Platf
 Never stage `notminelegacy-1.0.0.jar` into this repo's own `run/mods_raw` (dev sources provide it),
 and never stage the LSO jar here (not redistributable; building-bridges-only opt-in).
 
-**Known blocker (2026-08-31, escalated):** the full-ecosystem `runServer` fails in FML mod sorting with
-a mod-file ordering cycle among `buildingbridges` / `noaddedsugar` / `mixedblessings` / `remnantstars`
-(`mods.toml` `ordering="AFTER"` declarations that were invisible when all 9 modules shipped as one dev
-mod file in the monorepo). Fix belongs in those repos' mods.toml; re-run the smoke boot after module
-leaders deliver corrected jars.
+**Smoke-boot history (2026-08-31):**
+- Blocker 1 (RESOLVED): FML mod-sorting cycle among buildingbridges/noaddedsugar/mixedblessings/
+  remnantstars mods.toml `ordering="AFTER"` declarations. Fixed by the arbitrated buildingbridges
+  rebuild (`ordering="NONE"` on its NAS/MB/RS deps); the re-boot with all-built module jars passed
+  sorting and constructed all 9 modules (module jars now all sourced from `_tools/built-jars`,
+  hash-verified against its SHA256SUMS.txt).
+- Blocker 2 (OPEN, escalated to remnant-stars): headless `runServer` crashes in remnantstars
+  `FMLCommonSetupEvent` — `RemnantStarsNetwork.register` (RemnantStarsNetwork.java:122, the
+  `PromptSpellbookNaming` PLAY_TO_CLIENT message) loads client-only `net.minecraft.client.gui.screens.Screen`
+  on DEDICATED_SERVER (BootstrapMethodError via RuntimeDistCleaner). Pre-existing: the file is
+  byte-identical to the monorepo's; it never surfaced because the ecosystem was only ever booted
+  via `runClient`. A production dedicated server would crash the same way. Re-run the smoke boot
+  after remnant-stars delivers a side-safe jar.
