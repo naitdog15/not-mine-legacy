@@ -4,10 +4,22 @@ plugins {
     // Pinned (was '[6.0,6.2)' in the monorepo): a floating range makes an offline build depend on
     // whatever happened to be cached, and silently changes reobf/AT behaviour between machines.
     id 'net.minecraftforge.gradle' version '6.0.54'
+    // Generates a Mixin refmap at compile time and wires it into reobfJar's SRG remapping.
+    // Without this, mixin target selectors (written with official/MCP names for dev convenience)
+    // are never translated to SRG names for the shipped jar, and every @Inject/@Redirect etc.
+    // fails at runtime outside the ForgeGradle dev environment with "No refMap loaded" — harmless
+    // in dev (MC classes are already official-named there), fatal in a real Forge install.
+    id 'org.spongepowered.mixin' version '0.7.38'
+}
+
+mixin {
+    add sourceSets.main, 'notminelegacy.refmap.json'
+    config 'notminelegacy.mixins.json'
 }
 
 dependencies {
     implementation 'org.eclipse.jdt:org.eclipse.jdt.annotation:2.2.0'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 def mod_version = project.hasProperty('mod_version') ? project.mod_version : '1.0.0'
@@ -392,7 +404,8 @@ tasks.named('jar', Jar).configure {
             'Implementation-Title'    : mod_id,
             'Implementation-Version'  : project.version,
             'Implementation-Vendor'   : mod_authors,
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            'MixinConfigs'            : 'notminelegacy.mixins.json'
         ])
     }
 }
@@ -405,3 +418,19 @@ tasks.withType(JavaCompile).configureEach {
     // so they don't surface in the default --lifecycle output.
     options.compilerArgs << '-Xlint:-removal' << '-Xlint:-deprecation' << '-Xlint:-unchecked'
 }
+
+// Dev-env auto-publish — copies the built jar into ../../_dev-env/mods when the workspace dev
+// environment exists; safe no-op otherwise.
+def devEnvModsDir = project.file('../../_dev-env/mods')
+def devEnvJar = tasks.named('jar', Jar).flatMap { it.archiveFile }
+tasks.register('publishToDevEnv') {
+    dependsOn tasks.named('jar')
+    mustRunAfter tasks.named('reobfJar')
+    onlyIf { devEnvModsDir.isDirectory() }
+    doLast {
+        copy { from devEnvJar; into devEnvModsDir }
+        println "published ${devEnvJar.get().asFile.name} to _dev-env/mods"
+    }
+}
+tasks.named('build') { finalizedBy 'publishToDevEnv' }
+tasks.named('assemble') { finalizedBy 'publishToDevEnv' }

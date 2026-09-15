@@ -1,6 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
+  "refmap": "notminelegacy.refmap.json",
   "package": "com.temog.notminelegacy.mixin",
   "plugin": "com.temog.notminelegacy.mixin.NotMineLegacyMixinPlugin",
   "compatibilityLevel": "JAVA_17",
